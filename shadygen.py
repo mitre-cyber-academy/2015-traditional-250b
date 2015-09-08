@@ -69,11 +69,14 @@ for i in range (0,numMessages):
 
 	#If the message is a 'goodMessage', save the public key
 	if i in goodMessages:
+                shadypage=open("shady"+str(goodMessages.index(i)+1)+".html",'a')
 		pubkeys.write(public_key.exportKey('OpenSSH'))
+		shadypage.write(" "+public_key.exportKey('OpenSSH')+'</p>\n</body>\n</html>')
+                shadypage.close()
 
 	#If the message comes from the actual artist, also save the flag.
-	if i == goodMessages[0]:
-		pubkeys.write(flag)
+	if i == goodMessages[3]:
+		pubkeys.write(flag+'\n')
 
 	#Format the message portions in XML and save to the set of emails.
 	emailmsg='<email>\n\t<from>shady@imtherealshady.com</from>\n\t<topic>'+title+'</topic>\n\t<message>'+message+'</message>'
@@ -82,6 +85,7 @@ for i in range (0,numMessages):
 	emailmsg=emailmsg+'\n</email>\n'
 	email.write(emailmsg)
 
+email.write('</inbox>')
 #Save and close the set of emails.
 email.close()
 
