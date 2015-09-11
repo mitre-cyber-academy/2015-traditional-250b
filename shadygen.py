@@ -16,13 +16,14 @@ outPubKeys="pubkeys.txt"
 email=open(outEmail,'w')
 pubkeys=open(outPubKeys, 'w')
 
-email.write('<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n')
+email.write('<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<inbox>\n')
 
 #determine how many "emails" we are going to have
 numMessages=2000
 
 #decide which of the messages are going to be from good imposters and from the legitimate artist
 goodMessages=random.sample(range(0,numMessages),5)
+print goodMessages
 
 #Generate a message from each of these people.
 for i in range (0,numMessages):
@@ -37,7 +38,7 @@ for i in range (0,numMessages):
 	titles=["Password","The Password", "Got you the password","That thing you needed","Here it is"]
 	greetings=["Yo, ","Hey, ","Wassup, ", ""]
 	intros=["It's me, ","Its me, "]
-	name=["Slim.","Shady.","Slim Shady.","Eminem.","Marshall.","Marshall Mathers.","M&M.","Double M."]
+	name=["Slim.","Shady.","Slim Shady.","Eminem.","Marshall.","Marshall Mathers.","M&amp;M.","Double M."]
 	message1=["I got you ","I heard you needed ", "Here is ", "I'm sending you ", "This is ", "I sent you ", "Attached is "]
 	articles=["the ","my ","a "]
 	pwvariants=["password","pw","passcode","pass"]
@@ -47,12 +48,9 @@ for i in range (0,numMessages):
 
 	#Generate a random flag
 	flagdec=random.randint(268435456,4294967295)
-	print str(flagdec)
 	flaghex=hex(flagdec)
-	print str(flaghex)
 	flag="MCA-"+str(flaghex[2:])
 	flag=flag[:12]
-	print flag
 	message=message+flag	
 
 	signature="none"	
@@ -69,21 +67,24 @@ for i in range (0,numMessages):
 
 	#If the message is a 'goodMessage', save the public key
 	if i in goodMessages:
-                shadypage=open("shady"+str(goodMessages.index(i)+1)+".html",'a')
-		pubkeys.write(public_key.exportKey('OpenSSH'))
-		shadypage.write(" "+public_key.exportKey('OpenSSH')+'</p>\n</body>\n</html>')
-                shadypage.close()
+		readfrompage=open("shady"+str(goodMessages.index(i)+1)+"blank.html",'r')
+		pagecontent=readfrompage.read()
+		shadypage=open("shady"+str(goodMessages.index(i)+1)+".html",'w')
+		pubkeys.write(public_key.exportKey('OpenSSH')+'\n')
+		shadypage.write(pagecontent+" "+public_key.exportKey('OpenSSH')+'</p>\n</body>\n</html>')
+		shadypage.close()
+		readfrompage.close()
 
 	#If the message comes from the actual artist, also save the flag.
 	if i == goodMessages[3]:
 		pubkeys.write(flag+'\n')
 
 	#Format the message portions in XML and save to the set of emails.
-	emailmsg='<email>\n\t<from>shady@imtherealshady.com</from>\n\t<topic>'+title+'</topic>\n\t<message>'+message+'</message>'
+	emailmsg='\t<email>\n\t\t<from>shady@imtherealshady.com</from>\n\t\t<topic>'+title+'</topic>\n\t\t<message>'+message+'</message>'
 	if encType==1:
-		emailmsg=emailmsg+'\n\t<signature>'+str(signature[0])+'</signature>'
-	emailmsg=emailmsg+'\n</email>\n'
-	email.write(emailmsg)
+		emailmsg=emailmsg+'\n\t\t<signature>'+str(signature[0])+'</signature>'
+		emailmsg=emailmsg+'\n\t</email>\n'
+		email.write(emailmsg)
 
 email.write('</inbox>')
 #Save and close the set of emails.
