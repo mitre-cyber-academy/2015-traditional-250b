@@ -1,25 +1,19 @@
 import xml.etree.ElementTree as ET
-
 from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5
 from Crypto import Random
 from Crypto.Hash import SHA256
-from base64 import b64decode 
 
-rsakey=RSA.importKey('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQC4AGw0zx2qPXXyKAmn2/GE+NSUFNvnDZl3AjrxG45pdprrl6MpsF8vyQyR4nxumPKxgRNR709pTOLbhnr5M6O3akIJORxIc+zi8Qp0l/Ocy4nBxqf7ln+Lpy2W2JGchxaVLw4c+NQqELo74LNsTeg3RQQT9bEK09v9jACWQp+Hcw==')
+
+pubkey=RSA.importKey('ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCbT3x5Uk2aQuExM/mozvXZvoZ3HC5hsHgG18FLAmb2mESHm2ZvPveqDt/dqOop+5hSoY5L5zsfi61Xec9kCKTn6AgVDWMG7EHyr4jyQ5bL6je+jdcIEVgCL+WqkWR16RNZzPIkdkPzxl+6h5DF1vplWggStvZOv5DVvkpFWHMLMQ==')
 
 inbox=ET.parse('email.xml').getroot()
 
-i=0
 for email in inbox.findall('email'):
-    i=i+1
-    print "checked "+str(i)+" messages."
-    for signature in email.findall('signature'):
-        for message in email.findall('message'):
-            sig=b64decode(signature.text)
-            signer=PKCS1_v1_5.new(rsakey)
-            mes=message.text
-            digest = SHA256.new()
-            digest.update(b64decode(mes))
-            if signer.verify(digest, sig):
-                print 'verified message: '+mes
+	for signature in email.findall('signature'):
+		for message in email.findall('message'):
+			mes=message.text
+			hash = SHA256.new(mes).digest()
+			sig=long(signature.text)
+			if pubkey.verify(hash, (sig,"")):
+				print 'verified message: '+mes
+				break
